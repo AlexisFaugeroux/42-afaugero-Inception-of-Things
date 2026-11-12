@@ -7,3 +7,4 @@ sudo apt install vim
 sudo usermod -aG libvirt "$USER"
 sudo apt install vagrant
 vagrant plugin install vagrant-libvirt
+sudo apt install virtiofsd

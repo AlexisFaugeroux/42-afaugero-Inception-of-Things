@@ -1,0 +1,45 @@
+require "securerandom"
+
+# Cree un fichier .env et genere un token pour K3S s'il n'existe pas deja
+env_file = File.join(__dir__, ".env")
+File.write(env_file, "K3S_TOKEN=#{SecureRandom.hex(32)}\n") unless File.exist?(env_file)
+
+# Lit le fichier .env puis le transforme en string
+ENV_VARS = File.readlines(File.join(__dir__, ".env")).each_with_object({}) do |line, vars|
+  line = line.strip
+  next if line.empty? || line.start_with?("#")
+  key, value = line.split("=", 2)
+  vars[key] = value
+end
+
+Vagrant.configure("2") do |config|
+  # Configuration commune aux deux VMs
+  config.vm.box = "boxomatic/alpine-3.24"
+  config.vm.box_version = "20260930.0.1"
+
+  config.vm.provision "shell", inline: <<-SHELL
+    apk update
+    apk add iptables ip6tables
+    apk add linux-lts
+    apk add curl
+    apk add etcd
+    apk del linux-virt
+  SHELL
+  config.vm.provision :reload
+  # Configuration de la VM K3s server
+  config.vm.define "jbayonneS" do |server|
+    server.vm.hostname = "jbayonneS"
+    server.vm.network "private_network", ip: "192.168.56.110"
+
+    server.vm.provider "libvirt" do |libvirt|
+      libvirt_default_prefix = ""
+      libvirt.memory = 2048 
+      libvirt.cpus = 2
+      libvirt.driver = "qemu"
+      libvirt.memorybacking :access, :mode => "shared"
+    end
+    config.vm.synced_folder "src/", "/opt/iot_config/", create: true, type: "virtiofs"
+    server.vm.provision "shell", path: "scripts/server.sh", env: ENV_VARS
+  end
+
+end

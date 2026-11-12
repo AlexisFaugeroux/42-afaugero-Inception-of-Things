@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: html-file-app3
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <title>App3</title>
+    </head>
+    <body>
+      <h1>Hello World App3</h1>
+    </body>
+    </html>

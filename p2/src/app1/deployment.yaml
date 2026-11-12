@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-server-app1
+  labels:
+    app: nginx-server-app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-server-app1
+  template:
+    metadata:
+      labels:
+        app: nginx-server-app1
+    spec:
+      containers:
+      - name: nginx-server-app1
+        image: nginx:stable-alpine
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d/default.conf
+            subPath: nginx.conf
+            readOnly: true
+          - name: html-file-app1
+            mountPath: /usr/share/nginx/html/index.html
+            subPath: index.html
+            readOnly: true
+      volumes:
+        - name: nginx-config
+          configMap :
+            name: nginx-config-file
+        - name: html-file-app1
+          configMap:
+            name: html-file-app1 
