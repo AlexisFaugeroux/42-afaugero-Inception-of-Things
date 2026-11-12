@@ -7,6 +7,7 @@ set -e
 if command -v kubectl 2>/dev/null; then
 	apt-get purge -y kubectl
 	apt-get autoremove -y
+	msg "kubectl uninstallation complete"
 else
 	msg "Nothing to uninstall"
 fi

@@ -73,7 +73,7 @@ EOF
 		msg "user $TARGET_USER added to docker group: log out and login back to use docker without sudo"
 	fi
 
-	msg "...docker installation completed"
+	msg "Docker installation completed"
 else
 	msg "Docker already installed, skipping installation"
 fi

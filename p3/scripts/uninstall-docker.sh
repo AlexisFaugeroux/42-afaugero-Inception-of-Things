@@ -6,7 +6,6 @@ set -e
 
 if command -v docker >/dev/null 2>&1; then
 	# Uninstall packages and configuration files
-	msg "Unsinstalling packages..."
 	apt-get purge -y \
 		docker-ce \
 		docker-ce-cli \
@@ -39,7 +38,7 @@ if command -v docker >/dev/null 2>&1; then
 	rm -rf "$TARGET_HOME/.docker"
 	msg "...done"
 
-	msg "...uninstallation complete"
+	msg "Docker uninstallation complete"
 else
 	msg "Nothing to uninstall"
 fi
