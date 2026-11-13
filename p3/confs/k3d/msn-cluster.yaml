@@ -1,0 +1,32 @@
+---
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: msn
+servers: 1
+agents: 1
+token: superSecretToken
+
+ports:
+  - port: 8080:80
+    nodeFilters:
+      - loadbalancer
+  - port: 8443:443
+    nodeFilters:
+      - loadbalancer
+
+options:
+  k3d:
+    wait: true # wait for the cluster to be ready before giving back control
+  k3s:
+    extraArgs:
+      - arg: --disable=metrics-server
+        nodeFilters:
+          - server:*
+      - arg: --node-taint=CriticalAddonsONyl=true:NoExecute
+        nodeFilters:
+          - server:*
+  kubeconfig:
+    updateDefaultKubeconfig: true # add cluster to ~/.kube/config
+    switchCurrentContext: true # makes this cluster the active one
+

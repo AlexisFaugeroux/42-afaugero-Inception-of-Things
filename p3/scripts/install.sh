@@ -35,3 +35,16 @@ msg "=== k3d installation ==="
 "$SCRIPT_DIR/install-k3d.sh"
 msg ""
 msg "Installation completed successfully!"
+
+msg ""
+printf "Create the k3d cluster now? [y/n] " 1>&3 2>&1
+read -r answer || answer=""
+
+case "$answer" in
+  [yY]*)
+    sudo -u "$TARGER_USER" -H sh "$SCRIPT_DIR/setup.sh" 1>&3 2>&1
+    ;;
+  *)
+    msg "Skipped. Create it later with: $SCRIPT_DIR/setup.sh"
+    ;;
+esac
