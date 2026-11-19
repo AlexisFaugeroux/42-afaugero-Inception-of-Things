@@ -42,7 +42,7 @@ read -r answer || answer=""
 
 case "$answer" in
   [yY]*)
-    sudo -u "$TARGER_USER" -H sh "$SCRIPT_DIR/setup.sh" 1>&3 2>&1
+    sudo -u "$TARGET_USER" -H sh "$SCRIPT_DIR/setup.sh" 1>&3 2>&1
     ;;
   *)
     msg "Skipped. Create it later with: $SCRIPT_DIR/setup.sh"

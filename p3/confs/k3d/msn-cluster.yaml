@@ -23,7 +23,7 @@ options:
       - arg: --disable=metrics-server
         nodeFilters:
           - server:*
-      - arg: --node-taint=CriticalAddonsONyl=true:NoExecute
+      - arg: --node-taint=CriticalAddonsOnly=true:NoExecute
         nodeFilters:
           - server:*
   kubeconfig:
