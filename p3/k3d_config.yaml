@@ -1,0 +1,25 @@
+
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+
+metadata:
+  name: dev
+
+# Un seul nœud control-plane
+servers: 1
+
+# Aucun worker supplémentaire
+agents: 2
+
+# Exposer les applications web
+ports:
+  - port: "8080:80"
+    nodeFilters:
+      - loadbalancer
+
+# Configuration kubectl
+options:
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
+
