@@ -1,56 +1,33 @@
-require "securerandom"
+require 'securerandom'
 
-# Cree un fichier .env et genere un token pour K3S s'il n'existe pas deja
 env_file = File.join(__dir__, ".env")
-File.write(env_file, "K3S_TOKEN=#{SecureRandom.hex(32)}\n") unless File.exist?(env_file)
-
-# Lit le fichier .env puis le transforme en string
-ENV_VARS = File.readlines(File.join(__dir__, ".env")).each_with_object({}) do |line, vars|
-  line = line.strip
-  next if line.empty? || line.start_with?("#")
-  key, value = line.split("=", 2)
-  vars[key] = value
+unless File.exist?(env_file)
+	File.write(env_file, "K3S_TOKEN=#{SecureRandom.hex(32)}\n")
 end
 
+ENV_VARS = File.readlines(env_file)
+	.map(&:strip).reject(&:empty?)
+	.map { |line| line.split("=", 2) }.to_h
+
 Vagrant.configure("2") do |config|
-  # Configuration commune aux deux VMs
-  config.vm.box = "boxomatic/alpine-3.24"
-  config.vm.box_version = "20260930.0.1"
+	config.vm.box = "debian/trixie64"
+	config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  config.vm.provision "shell", inline: <<-SHELL
-    apk update
-    apk add curl
-    apk add iptables
-  SHELL
-  
-  # Configuration de la VM K3s server
-  config.vm.define "afaugeroS" do |server|
-    server.vm.hostname = "afaugeroS"
-    server.vm.network "private_network", ip: "192.168.56.110"
+	config.vm.provider :libvirt do |lv|
+		lv.cpus = 1
+		lv.memory = 1024
+		lv.default_prefix = ""
+	end
 
-    server.vm.synced_folder ".", "/vagrant", disabled: true
+	config.vm.define "mpelageS" do |server|
+		server.vm.hostname = "mpelageS"
+		server.vm.network "private_network", ip: "192.168.56.110"
+		server.vm.provision "shell", path: "scripts/server.sh", env: ENV_VARS
+	end
 
-    server.vm.provider "libvirt" do |libvirt|
-      libvirt.default_prefix = ""
-      libvirt.memory = 1024
-      libvirt.cpus = 1
-    end
-
-    server.vm.provision "shell", path: "scripts/server.sh", env: ENV_VARS
-  end
-
-  # Configuration de la VM K3s worker
-  config.vm.define "afaugeroSW" do |worker|
-    worker.vm.hostname = "afaugeroSW"
-    worker.vm.network "private_network", ip: "192.168.56.111"
-
-    worker.vm.synced_folder ".", "/vagrant", disabled: true
-
-    worker.vm.provider "libvirt" do |libvirt|
-      libvirt.default_prefix = ""
-      libvirt.memory = 512
-      libvirt.cpus = 1
-    end
-    worker.vm.provision "shell", path: "scripts/worker.sh", env: ENV_VARS
-  end
+	config.vm.define "mpelageSW" do |worker|
+		worker.vm.hostname = "mpelageSW"
+		worker.vm.network "private_network", ip: "192.168.56.111"
+		worker.vm.provision "shell", path: "scripts/worker.sh", env: ENV_VARS
+	end
 end

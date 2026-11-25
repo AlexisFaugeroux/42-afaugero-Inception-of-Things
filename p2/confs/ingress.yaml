@@ -1,12 +1,9 @@
----
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cluster-ingress
+  name: apps-ingress
 spec:
-  ingressClassName: traefik
   rules:
-    # Service app1
     - host: app1.com
       http:
         paths:
@@ -14,10 +11,10 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: app1-service
+                name: app1
                 port:
                   number: 80
-    # Service app2
+
     - host: app2.com
       http:
         paths:
@@ -25,16 +22,16 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: app2-service
+                name: app2
                 port:
                   number: 80
-    # Service app3 -> default backend (no host specified)
+
     - http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: app3-service
+                name: app3
                 port:
                   number: 80
