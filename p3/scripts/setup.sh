@@ -61,4 +61,7 @@ kubectl config set-context "$CONTEXT" --namespace=dev
 # 9. Deploy ArgoCD
 kubectl apply --server-side -k "$ARGOCD_DIR" -n argocd
 
+# 10. Deploy ArgoCD application
+kubectl apply -f "$ARGOCD_DIR/application.yaml"
+
 echo "Deployment completed successfully!"
