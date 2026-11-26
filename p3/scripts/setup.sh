@@ -5,7 +5,8 @@ set -e
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 
 K3D_CONFIG="$SCRIPT_DIR/../confs/k3d/msn-cluster.yaml"
-ENV_FILE="$SCRIPT_DIR/../confs/k8s/back/.env"
+ENV_FILE="$SCRIPT_DIR/../confs/k8s/.env"
+DATA_DIR="/home/afaugero/iot/data"
 ARGOCD_DIR="$SCRIPT_DIR/../confs/k8s/argocd"
 
 CLUSTER_NAME="msn"
@@ -26,7 +27,23 @@ for cmd in k3d kubectl; do
   fi
 done
 
-# 3. Create cluster if needed
+# 3. Create directory for persistent data
+if [ ! -d "$DATA_DIR" ]; then
+  mkdir -p "$DATA_DIR"
+  echo "Directory created: $DATA_DIR"
+  if [ ! -d "$DATA_DIR/postgres"];then
+    mkdir "$DATA_DIR/postgres"
+    echo "Directory created: $DATA_DIR/postgres"
+  fi
+  if [ ! -d "$DATA_DIR/media"];then
+    mkdir "$DATA_DIR/media"
+    echo "Directory created: $DATA_DIR/media"
+  fi
+else
+  echo "Directory already exists: $DATA_DIR"
+fi
+
+# 4. Create cluster if needed
 if ! k3d cluster get "$CLUSTER_NAME" 1>/dev/null; then
   echo "Creating k3d cluster..."
   k3d cluster create --config "$K3D_CONFIG"
@@ -35,33 +52,34 @@ else
   echo "Cluster $CLUSTER_NAME already exists, skipping"
 fi
 
-# 4. Select Kubernetes context
+# 5. Select Kubernetes context
 kubectl config use-context "$CONTEXT"
 
-# 5. Wait for nodes
+# 6. Wait for nodes
 kubectl wait \
   --for=condition=Ready \
   nodes --all \
   --timeout=60s
 
-# 6. Create namespaces
+# 7. Create namespaces
 for ns in argocd dev; do
   kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f -
 done
 
-# 7. Create or update secrets
+# 8. Create or update secrets
 kubectl create secret generic msn-env \
   -n dev \
   --from-env-file="$ENV_FILE" \
   --dry-run=client -o yaml | kubectl apply -f -
 
-# 8. Set default namespace to "dev" (useful for development)
+
+# 9. Set default namespace to "dev" (useful for development)
 kubectl config set-context "$CONTEXT" --namespace=dev
 
-# 9. Deploy ArgoCD
+# 10. Deploy ArgoCD
 kubectl apply --server-side -k "$ARGOCD_DIR" -n argocd
 
-# 10. Deploy ArgoCD application
+# 11. Deploy ArgoCD application
 kubectl apply -f "$ARGOCD_DIR/application.yaml"
 
 echo "Deployment completed successfully!"

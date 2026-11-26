@@ -30,3 +30,10 @@ options:
     updateDefaultKubeconfig: true # add cluster to ~/.kube/config
     switchCurrentContext: true # makes this cluster the active one
 
+volumes:
+  - volume: /home/afaugero/iot/data/postgres:/mnt/data/postgresql
+    nodeFilters:
+      - agent:0
+  - volume: /home/afaugero/iot/data/media:/mnt/data/media
+    nodeFilters:
+      - agent:0
