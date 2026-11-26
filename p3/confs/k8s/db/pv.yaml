@@ -11,9 +11,6 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: manual
-  hostPath:
-    path: /mnt/data/postgresql
-    type: DirectoryOrCreate
   local:
     path: /mnt/data/postgresql
   nodeAffinity:

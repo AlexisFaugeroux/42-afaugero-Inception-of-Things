@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-media
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-media
+  template:
+    metadata:
+      labels:
+        app: nginx-media
+    spec:
+      containers:
+        - name: nginx-media
+          image: nginx:1.30.3-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: nginx-media
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+            periodSeconds: 10
+          volumeMounts:
+            - name: media-data
+              mountPath: /var/www/media
+            - name: nginx-media-config
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+      volumes:
+        - name: media-data
+          persistentVolumeClaim:
+            claimName: media-pvc
+        - name: nginx-media-config
+          configMap:
+            name: nginx-media-config
+            items:
+              - key: default.conf
+                path: default.conf

@@ -1,12 +1,8 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 resources:
-  - statefulset.yaml
+  - pv.yaml
   - pvc.yaml
+  - statefulSet.yaml
   - service.yaml
-
-images:
-  - name: alexisfaugeroux/makesomenoise-back
-    newTag: v1
